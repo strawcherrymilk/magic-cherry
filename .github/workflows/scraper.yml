@@ -2,7 +2,7 @@ name: Tatake
 
 on:
   schedule:
-    - cron: '0 * * * *'  # runs every hour
+    - cron: '*/20 * * * *'  # runs every 20 min
   workflow_dispatch:       # lets you run it manually from GitHub too
 
 jobs:
