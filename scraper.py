@@ -12,7 +12,7 @@ from datetime import datetime
 # -------------------------------------------------------------------
 EMAIL_SENDER     = "hausoftaeyong@gmail.com"
 EMAIL_PASSWORD   = "qtoh xxeo sdbt alrk"       # Gmail App Password, not your real password
-EMAIL_RECIPIENT  = "hausoftaeyong"
+EMAIL_RECIPIENT  = "hausoftaeyong@gmail.com"
 SEEN_EVENTS_FILE = "seen_events.json"
 URL              = "https://disneyworld.disney.go.com/events-tours/shopping-events/"
 # -------------------------------------------------------------------
