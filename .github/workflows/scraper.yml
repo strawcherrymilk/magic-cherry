@@ -1,0 +1,37 @@
+name: Disney Merchandise Scraper
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # runs every hour
+  workflow_dispatch:       # lets you run it manually from GitHub too
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+        run: python scraper.py
+
+      - name: Save seen_events.json back to repo
+        run: |
+          git config user.name "magic-cherry-bot"
+          git config user.email "actions@github.com"
+          git add seen_events.json
+          git diff --staged --quiet || git commit -m "update seen_events"
+          git push

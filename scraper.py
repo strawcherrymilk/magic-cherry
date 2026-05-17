@@ -8,11 +8,11 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
 # -------------------------------------------------------------------
-# CONFIG -- fill these in before running
+# CONFIG -- set these as GitHub Secrets (or as local env variables)
 # -------------------------------------------------------------------
-EMAIL_SENDER     = "hausoftaeyong@gmail.com"
-EMAIL_PASSWORD   = "qtoh xxeo sdbt alrk"       # Gmail App Password, not your real password
-EMAIL_RECIPIENT  = "hausoftaeyong@gmail.com"
+EMAIL_SENDER     = os.environ.get("EMAIL_SENDER", "your_gmail@gmail.com")
+EMAIL_PASSWORD   = os.environ.get("EMAIL_PASSWORD", "your_app_password")
+EMAIL_RECIPIENT  = os.environ.get("EMAIL_RECIPIENT", "your_email@example.com")
 SEEN_EVENTS_FILE = "seen_events.json"
 URL              = "https://disneyworld.disney.go.com/events-tours/shopping-events/"
 BASE_URL         = "https://disneyworld.disney.go.com"
@@ -27,7 +27,6 @@ def fetch_events():
     soup = BeautifulSoup(response.text, "html.parser")
     events = []
 
-    # Find the Merchandise Spotlight section
     spotlight_heading = None
     for h2 in soup.find_all("h2"):
         if "Merchandise Spotlight" in h2.get_text():
@@ -38,7 +37,6 @@ def fetch_events():
         print("Could not find Merchandise Spotlight section.")
         return events
 
-    # Walk siblings until the next h2 (next section)
     for sibling in spotlight_heading.find_next_siblings():
         if sibling.name == "h2":
             break
@@ -48,12 +46,10 @@ def fetch_events():
             if not title_raw:
                 continue
 
-            # Check for SOLD OUT in the surrounding block
             parent = h3.find_parent()
             parent_text = parent.get_text(separator="\n", strip=True) if parent else ""
             sold_out = "SOLD OUT" in parent_text.upper()
 
-            # Pull date/time/location details
             details = {}
             for line in parent_text.split("\n"):
                 line = line.strip()
@@ -64,7 +60,6 @@ def fetch_events():
                 elif line.lower().startswith("location"):
                     details["location"] = line
 
-            # Look for any registration/ticket/buy links nearby
             registration_link = None
             if parent:
                 for a in parent.find_all("a", href=True):
@@ -77,7 +72,6 @@ def fetch_events():
                         registration_link = BASE_URL + href if href.startswith("/") else href
                         break
 
-            # Clean up title
             title = title_raw.replace("SOLD OUT", "").strip()
 
             events.append({
@@ -140,11 +134,8 @@ def main():
         prev  = seen.get(title)
 
         if prev is None:
-            # Brand new event
             alerts.append(f"NEW EVENT FOUND:\n{format_event(event)}")
-
         else:
-            # Registration link just appeared
             if not prev.get("registration_link") and event.get("registration_link"):
                 alerts.append(
                     f"REGISTRATION LINK NOW LIVE for: {title}\n"
@@ -152,7 +143,6 @@ def main():
                     + "\n".join(f"   {v}" for v in event.get("details", {}).values())
                 )
 
-            # Sold out status changed
             if not prev.get("sold_out") and event.get("sold_out"):
                 alerts.append(f"NOW SOLD OUT: {title}")
 
@@ -169,7 +159,6 @@ def main():
     else:
         print("No changes found.")
 
-    # Save current state keyed by title
     new_seen = {e["title"]: e for e in current_events}
     save_seen_events(new_seen)
 
