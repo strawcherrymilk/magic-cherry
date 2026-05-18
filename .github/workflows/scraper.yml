@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '*/20 * * * *'  # runs every 20 min
   workflow_dispatch:       # lets you run it manually from GitHub too
+  repository_dispatch:
+    types: [trigger]
   push:
     branches:
       - main
