@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '*/20 * * * *'  # runs every 20 min
   workflow_dispatch:       # lets you run it manually from GitHub too
+  push:
+    branches:
+      - main
 
 jobs:
   scrape:
